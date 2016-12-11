@@ -1,0 +1,77 @@
+import java.io.*;
+import java.net.*;
+/**
+  5. This program implements a multithreaded server
+  that listens to
+  6. port 8189 and echoes back all client input.
+  7. */
+public class ThreadedEchoServer
+{
+	public static void main(String[] args )
+	{
+		try
+		{
+			int i = 1;
+			ServerSocket s = new ServerSocket(80);
+
+			for (;;)
+			{
+				System.out.println("waiting....");
+				Socket incoming = s.accept( );
+				System.out.println("Spawning " + i);
+				Thread t = new ThreadedEchoHandler(incoming, i);
+				t.start();
+				i++;
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+}
+/**
+  34. This class handles the client input for one
+  server socket
+  35. connection.
+ */
+class ThreadedEchoHandler extends Thread
+{
+
+
+	public ThreadedEchoHandler(Socket i, int c)
+	{
+		incoming = i; counter = c;
+	}
+
+	public void run()
+	{
+		try
+		{
+			BufferedReader in = new BufferedReader
+				(new InputStreamReader(incoming.getInputStream()));
+			PrintWriter out = new PrintWriter(incoming.getOutputStream(), true /*autoFlush */);
+			out.println( "Hello! Enter BYE to exit." );
+			boolean done = false;
+			while (!done)
+			{
+				String str = in.readLine();
+				if (str == null) done = true;
+				else
+				{
+					out.println("Echo (" + counter + "):" + str);
+
+					if (str.trim().equals("BYE"))
+						done = true;
+				}
+			}
+			incoming.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	private Socket incoming;
+	private int counter;
+}
